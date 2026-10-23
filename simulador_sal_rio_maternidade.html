@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulador de Salário Maternidade | Josivaldo Fonseca</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        gold: {
+                            300: '#FFE68B',
+                            400: '#E5C158',
+                            500: '#D4AF37',
+                            600: '#B88E18',
+                            700: '#8A680C',
+                        },
+                        appbg: '#0C0C0E',
+                        cardbg: '#111114',
+                        optionbg: '#18181C',
+                    },
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #050506;
+            color: #F3F4F6;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* Moldura do Card e Estilizações Gold Premium */
+        .quiz-card {
+            background-color: #111114;
+            border: 1px solid rgba(212, 175, 55, 0.28);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.85), 0 0 25px rgba(212, 175, 55, 0.08);
+        }
+
+        .gold-gradient-text {
+            background: linear-gradient(135deg, #FFE89C 0%, #D4AF37 60%, #A37F16 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .gold-btn {
+            background: linear-gradient(180deg, #E2B831 0%, #B88E18 100%);
+            box-shadow: 0 4px 20px rgba(212, 175, 55, 0.35);
+            transition: all 0.2s ease-in-out;
+        }
+
+        .gold-btn:hover {
+            background: linear-gradient(180deg, #EBC33F 0%, #C89C1F 100%);
+            box-shadow: 0 6px 25px rgba(212, 175, 55, 0.5);
+            transform: translateY(-1px);
+        }
+
+        .gold-btn:active {
+            transform: translateY(1px);
+        }
+
+        .option-btn {
+            background-color: #18181C;
+            border: 1px solid #282830;
+            transition: all 0.2s ease;
+        }
+
+        .option-btn:hover, .option-btn:focus {
+            border-color: #D4AF37;
+            background-color: #202026;
+        }
+
+        .option-btn:active {
+            transform: scale(0.98);
+        }
+
+        .fade-in {
+            animation: fadeIn 0.35s ease-out forwards;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(8px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-center items-center p-3 sm:p-5 selection:bg-gold-500 selection:text-black">
+
+    <!-- Container Principal estilo Réplica do Layout Instagram -->
+    <main class="w-full max-w-md my-auto">
+        
+        <div class="quiz-card rounded-[28px] p-6 sm:p-7 relative overflow-hidden text-center">
+            
+            <!-- PERFIL EM DESTAQUE (Fixado no topo em todas as telas) -->
+            <div class="flex flex-col items-center mb-5 relative group">
+                <!-- Foto do Josivaldo Fonseca com moldura circular e badge verificado -->
+                <div class="relative mb-3">
+                    <div class="w-24 h-24 sm:w-28 sm:h-28 rounded-full p-[3px] bg-gradient-to-b from-gold-400 via-gold-500 to-amber-800 shadow-2xl overflow-hidden relative">
+                        <img id="profile-img" 
+                             src="image_918bb5.jpg" 
+                             onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&w=400&q=80';" 
+                             alt="Josivaldo Fonseca" 
+                             class="w-full h-full rounded-full object-cover object-top">
+                    </div>
+                    <!-- Badge Verificado (Dourado com Icone Check) -->
+                    <div class="absolute bottom-1 right-1 w-6 h-6 bg-gold-500 rounded-full flex items-center justify-center text-black font-bold text-xs shadow-lg border-2 border-[#111114]">
+                        <i class="fa-solid fa-check"></i>
+                    </div>
+
+                    <!-- Botão Flutuante Opcional para Fazer Upload/Trocar Foto Localmente -->
+                    <label for="upload-photo" title="Alterar Foto de Perfil" class="absolute inset-0 rounded-full bg-black/60 opacity-0 group-hover:opacity-100 flex items-center justify-center cursor-pointer transition-opacity duration-200">
+                        <i class="fa-solid fa-camera text-gold-400 text-xl"></i>
+                    </label>
+                    <input type="file" id="upload-photo" accept="image/*" class="hidden" onchange="handlePhotoUpload(event)">
+                </div>
+
+                <!-- Nome e Cargo Profissional -->
+                <h1 class="text-xl sm:text-[22px] font-extrabold text-white tracking-tight">Josivaldo Fonseca</h1>
+                <p class="text-xs font-bold text-gold-500 tracking-wider uppercase mt-0.5">CONSULTOR PREVIDENCIÁRIO</p>
+            </div>
+
+            <!-- BARRA DE PROGRESSO DO QUIZ -->
+            <div id="progress-container" class="hidden mb-5">
+                <div class="flex justify-between items-center mb-1.5 text-xs text-gray-400">
+                    <span id="progress-step-text" class="font-medium text-gold-400">Pergunta 1 de 4</span>
+                    <span id="progress-percentage" class="font-semibold text-gray-300">25%</span>
+                </div>
+                <div class="w-full bg-neutral-800 h-2 rounded-full overflow-hidden p-0.5 border border-neutral-700/60">
+                    <div id="progress-bar" class="bg-gradient-to-r from-gold-600 via-gold-500 to-gold-300 h-full rounded-full transition-all duration-300 ease-out" style="width: 25%"></div>
+                </div>
+            </div>
+
+            <div class="w-full h-[1px] bg-neutral-800/80 mb-6" id="divider-line"></div>
+
+            <!-- TELA INITIAL (WELCOME) -->
+            <div id="screen-welcome" class="fade-in">
+                <h2 class="text-2xl sm:text-[26px] font-extrabold text-white leading-snug mb-3">
+                    Simulador de <span class="gold-gradient-text">Salário Maternidade</span>
+                </h2>
+
+                <p class="text-gray-300 text-sm leading-relaxed mb-6 px-1">
+                    Responda 4 perguntas rápidas e descubra se você tem direito de receber até 4 salários mínimos do INSS.
+                </p>
+
+                <!-- Cards Informativos -->
+                <div class="grid grid-cols-2 gap-3 mb-6 text-left">
+                    <div class="bg-[#18181C] border border-[#26262E] rounded-xl p-3 flex items-start space-x-2.5">
+                        <span class="text-gold-500 text-base mt-0.5"><i class="fa-solid fa-bolt"></i></span>
+                        <div>
+                            <h4 class="text-xs font-bold text-white">100% Rápido</h4>
+                            <p class="text-[11px] text-gray-400">Leve 30 segundos</p>
+                        </div>
+                    </div>
+                    <div class="bg-[#18181C] border border-[#26262E] rounded-xl p-3 flex items-start space-x-2.5">
+                        <span class="text-gold-500 text-base mt-0.5"><i class="fa-solid fa-shield-halved"></i></span>
+                        <div>
+                            <h4 class="text-xs font-bold text-white">Gratuito</h4>
+                            <p class="text-[11px] text-gray-400">Análise Inicial</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Botão de Ação -->
+                <button onclick="startQuiz()" class="gold-btn w-full py-4 px-6 rounded-2xl text-black font-extrabold text-base flex items-center justify-center space-x-2 shadow-lg mb-4 uppercase tracking-wide">
+                    <span>INICIAR SIMULAÇÃO</span>
+                    <i class="fa-solid fa-arrow-right text-sm"></i>
+                </button>
+
+                <p class="text-[11px] text-gray-400 flex items-center justify-center space-x-1">
+                    <i class="fa-solid fa-lock text-xs text-gray-500"></i>
+                    <span>Seus dados estão 100% protegidos.</span>
+                </p>
+            </div>
+
+            <!-- TELA PERGUNTA 1 -->
+            <div id="screen-q1" class="hidden text-left fade-in">
+                <p class="text-xs uppercase tracking-widest text-gold-500 font-bold mb-1">1ª Pergunta</p>
+                <h3 class="text-lg font-bold text-white mb-4">Qual é o seu momento atual?</h3>
+                
+                <div class="space-y-2.5">
+                    <button onclick="selectOption(1, 'gravida')" class="option-btn w-full p-3.5 rounded-xl text-left text-sm font-medium text-gray-200 flex items-center justify-between group">
+                        <span>🤰 Estou grávida</span>
+                        <i class="fa-solid fa-chevron-right text-xs text-gray-600 group-hover:text-gold-500"></i>
+                    </button>
+                    <button onclick="selectOption(1, 'mae')" class="option-btn w-full p-3.5 rounded-xl text-left text-sm font-medium text-gray-200 flex items-center justify-between group">
+                        <span>👶 Já tive meu filho (ele tem menos de 5 anos)</span>
+                        <i class="fa-solid fa-chevron-right text-xs text-gray-600 group-hover:text-gold-500"></i>
+                    </button>
+                    <button onclick="selectOption(1, 'adocao')" class="option-btn w-full p-3.5 rounded-xl text-left text-sm font-medium text-gray-200 flex items-center justify-between group">
+                        <span>🤝 Estou em processo de adoção ou com guarda judicial</span>
+                        <i class="fa-solid fa-chevron-right text-xs text-gray-600 group-hover:text-gold-500"></i>
+                    </button>
+                    <button onclick="selectOption(1, 'nenhuma')" class="option-btn w-full p-3.5 rounded-xl text-left text-sm font-medium text-gray-200 flex items-center justify-between group">
+                        <span>❌ Nenhuma das opções acima</span>
+                        <i class="fa-solid fa-chevron-right text-xs text-gray-600 group-hover:text-gold-500"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- TELA PERGUNTA 2 -->
+            <div id="screen-q2" class="hidden text-left fade-in">
+                <p class="text-xs uppercase tracking-widest text-gold-500 font-bold mb-1">2ª Pergunta</p>
+                <h3 class="text-lg font-bold text-white mb-4">Em qual destas fases você se encontra?</h3>
+                
+                <div class="space-y-2.5">
+                    <button onclick="selectOption(2, 'gestante_1_5')" class="option-btn w-full p-3.5 rounded-xl text-left text-sm font-medium text-gray-200 flex items-center justify-between group">
+                        <span>🤰 Gestante: de 1 a 5 meses</span>
+                        <i class="fa-solid fa-chevron-right text-xs text-gray-600 group-hover:text-gold-500"></i>
+                    </button>
+                    <button onclick="selectOption(2, 'gestante_6_9')" class="option-btn w-full p-3.5 rounded-xl text-left text-sm font-medium text-gray-200 flex items-center justify-between group">
+                        <span>🤰 Gestante: de 6 a 9 meses</span>
+                        <i class="fa-solid fa-chevron-right text-xs text-gray-600 group-hover:text-gold-500"></i>
+                    </button>
+                    <button onclick="selectOption(2, 'filho_ate_5')" class="option-btn w-full p-3.5 rounded-xl text-left text-sm font-medium text-gray-200 flex items-center justify-between group">
+                        <span>👶 Meu filho já nasceu e tem até 5 anos</span>
+                        <i class="fa-solid fa-chevron-right text-xs text-gray-600 group-hover:text-gold-500"></i>
+                    </button>
+                    <button onclick="selectOption(2, 'termo_guarda')" class="option-btn w-full p-3.5 rounded-xl text-left text-sm font-medium text-gray-200 flex items-center justify-between group">
+                        <span>📄 Aguardando o termo de guarda / sentença de adoção</span>
+                        <i class="fa-solid fa-chevron-right text-xs text-gray-600 group-hover:text-gold-500"></i>
+                    </button>
+                </div>
+
+                <button onclick="prevStep(2)" class="mt-4 text-xs text-gray-400 hover:text-gray-200 flex items-center space-x-1">
+                    <i class="fa-solid fa-arrow-left"></i> <span>Voltar para pergunta anterior</span>
+                </button>
+            </div>
+
+            <!-- TELA PERGUNTA 3 -->
+            <div id="screen-q3" class="hidden text-left fade-in">
+                <p class="text-xs uppercase tracking-widest text-gold-500 font-bold mb-1">3ª Pergunta</p>
+                <h3 class="text-lg font-bold text-white mb-4">Como está sua situação de trabalho hoje?</h3>
+                
+                <div class="space-y-2.5">
+                    <button onclick="selectOption(3, 'clt')" class="option-btn w-full p-3.5 rounded-xl text-left text-sm font-medium text-gray-200 flex items-center justify-between group">
+                        <span>💼 Carteira assinada ou Contrato temporário (CLT)</span>
+                        <i class="fa-solid fa-chevron-right text-xs text-gray-600 group-hover:text-gold-500"></i>
+                    </button>
+                    <button onclick="selectOption(3, 'mei')" class="option-btn w-full p-3.5 rounded-xl text-left text-sm font-medium text-gray-200 flex items-center justify-between group">
+                        <span>🏢 MEI (Microempreendedora Individual)</span>
+                        <i class="fa-solid fa-chevron-right text-xs text-gray-600 group-hover:text-gold-500"></i>
+                    </button>
+                    <button onclick="selectOption(3, 'autonoma')" class="option-btn w-full p-3.5 rounded-xl text-left text-sm font-medium text-gray-200 flex items-center justify-between group">
+                        <span>🛠️ Autônoma / Trabalhadora informal / Prestadora de serviços</span>
+                        <i class="fa-solid fa-chevron-right text-xs text-gray-600 group-hover:text-gold-500"></i>
+                    </button>
+                    <button onclick="selectOption(3, 'desempregada')" class="option-btn w-full p-3.5 rounded-xl text-left text-sm font-medium text-gray-200 flex items-center justify-between group">
+                        <span>🏠 Desempregada ou Dona de casa</span>
+                        <i class="fa-solid fa-chevron-right text-xs text-gray-600 group-hover:text-gold-500"></i>
+                    </button>
+                    <button onclick="selectOption(3, 'facultativa')" class="option-btn w-full p-3.5 rounded-xl text-left text-sm font-medium text-gray-200 flex items-center justify-between group">
+                        <span>🤝 Contribuo por conta própria (Segurada Facultativa)</span>
+                        <i class="fa-solid fa-chevron-right text-xs text-gray-600 group-hover:text-gold-500"></i>
+                    </button>
+                </div>
+
+                <button onclick="prevStep(3)" class="mt-4 text-xs text-gray-400 hover:text-gray-200 flex items-center space-x-1">
+                    <i class="fa-solid fa-arrow-left"></i> <span>Voltar para pergunta anterior</span>
+                </button>
+            </div>
+
+            <!-- TELA PERGUNTA 4 -->
+            <div id="screen-q4" class="hidden text-left fade-in">
+                <p class="text-xs uppercase tracking-widest text-gold-500 font-bold mb-1">4ª Pergunta</p>
+                <h3 class="text-lg font-bold text-white mb-4">Você já contribuiu para o INSS (ou trabalhou de carteira assinada) alguma vez na vida?</h3>
+                
+                <div class="space-y-2.5">
+                    <button onclick="selectOption(4, 'sim_atualmente')" class="option-btn w-full p-3.5 rounded-xl text-left text-sm font-medium text-gray-200 flex items-center justify-between group">
+                        <span>✅ Sim, contribuo atualmente</span>
+                        <i class="fa-solid fa-chevron-right text-xs text-gray-600 group-hover:text-gold-500"></i>
+                    </button>
+                    <button onclick="selectOption(4, 'ja_contribuiu')" class="option-btn w-full p-3.5 rounded-xl text-left text-sm font-medium text-gray-200 flex items-center justify-between group">
+                        <span>🟡 Não contribuo hoje, mas já contribui no passado</span>
+                        <i class="fa-solid fa-chevron-right text-xs text-gray-600 group-hover:text-gold-500"></i>
+                    </button>
+                    <button onclick="selectOption(4, 'nunca')" class="option-btn w-full p-3.5 rounded-xl text-left text-sm font-medium text-gray-200 flex items-center justify-between group">
+                        <span>❌ Nunca contribui para o INSS</span>
+                        <i class="fa-solid fa-chevron-right text-xs text-gray-600 group-hover:text-gold-500"></i>
+                    </button>
+                </div>
+
+                <button onclick="prevStep(4)" class="mt-4 text-xs text-gray-400 hover:text-gray-200 flex items-center space-x-1">
+                    <i class="fa-solid fa-arrow-left"></i> <span>Voltar para pergunta anterior</span>
+                </button>
+            </div>
+
+            <!-- LOADING PROCESSAMENTO -->
+            <div id="screen-loading" class="hidden py-8 text-center fade-in">
+                <div class="inline-block relative w-12 h-12 mb-3">
+                    <div class="w-12 h-12 rounded-full border-4 border-gold-500/20 border-t-gold-500 animate-spin"></div>
+                </div>
+                <h3 class="text-base font-bold text-white mb-1">Analisando suas respostas...</h3>
+                <p class="text-xs text-gray-400">Verificando requisitos de carência e qualidade de segurada no INSS.</p>
+            </div>
+
+            <!-- TELA DE RESULTADO FINAL / DIAGNÓSTICO -->
+            <div id="screen-result" class="hidden text-left fade-in">
+                <div id="result-badge" class="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full text-xs font-semibold mb-3">
+                    <!-- Preenchido via JS -->
+                </div>
+
+                <h2 id="result-title" class="text-xl sm:text-2xl font-black text-white mb-2 leading-tight">
+                    <!-- Preenchido via JS -->
+                </h2>
+
+                <div id="result-description" class="text-xs sm:text-sm text-gray-300 mb-4 leading-relaxed bg-[#18181C] p-3.5 rounded-xl border border-neutral-800">
+                    <!-- Preenchido via JS -->
+                </div>
+
+                <!-- Resumo das Respostas Selecionadas -->
+                <div class="bg-[#151518] border border-neutral-800/80 rounded-xl p-3 mb-5 text-xs text-gray-300 space-y-1">
+                    <p class="font-bold text-gold-400 mb-1">Resumo das Suas Respostas:</p>
+                    <p>• <b>Momento:</b> <span id="summary-q1"></span></p>
+                    <p>• <b>Fase:</b> <span id="summary-q2"></span></p>
+                    <p>• <b>Situação de Trabalho:</b> <span id="summary-q3"></span></p>
+                    <p>• <b>Histórico INSS:</b> <span id="summary-q4"></span></p>
+                </div>
+
+                <!-- Botão de Ação WhatsApp de Alta Conversão -->
+                <a id="whatsapp-btn" href="#" target="_blank" rel="noopener noreferrer" class="gold-btn w-full py-4 px-4 rounded-2xl text-black font-extrabold text-xs sm:text-sm flex items-center justify-center space-x-2 shadow-xl uppercase tracking-wider text-center">
+                    <i class="fa-brands fa-whatsapp text-lg sm:text-xl"></i>
+                    <span>FALAR AGORA COM O CONSULTOR JOSIVALDO NO WHATSAPP ➔</span>
+                </a>
+
+                <div class="text-center mt-3">
+                    <button onclick="restartQuiz()" class="text-[11px] text-gray-500 hover:text-gray-300 underline">
+                        Refazer simulação
+                    </button>
+                </div>
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- RODAPÉ INSTITUCIONAL (Fora do Card) -->
+    <footer class="w-full max-w-md text-center py-5 text-gray-400 space-y-1">
+        <p class="text-sm font-bold text-gray-300">El Shadai Serviços & Consultoria</p>
+        <p class="text-xs font-medium text-gold-500">Josivaldo Fonseca • Consultor Previdenciário</p>
+        <p class="text-[10px] text-gray-500 pt-1">Este site não possui vínculo governamental direto com o INSS.</p>
+    </footer>
+
+    <!-- LÓGICA DO SIMULADOR EM JAVASCRIPT -->
+    <script>
+        const answers = {
+            q1: null,
+            q2: null,
+            q3: null,
+            q4: null
+        };
+
+        const totalSteps = 4;
+
+        // Permite alterar a foto de perfil enviando um arquivo local
+        function handlePhotoUpload(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('profile-img').src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function startQuiz() {
+            document.getElementById('screen-welcome').classList.add('hidden');
+            document.getElementById('progress-container').classList.remove('hidden');
+            showStep(1);
+        }
+
+        function updateProgress(step) {
+            const percentage = Math.round((step / totalSteps) * 100);
+            document.getElementById('progress-step-text').innerText = `Pergunta ${step} de ${totalSteps}`;
+            document.getElementById('progress-percentage').innerText = `${percentage}%`;
+            document.getElementById('progress-bar').style.width = `${percentage}%`;
+        }
+
+        function showStep(step) {
+            for(let i = 1; i <= 4; i++) {
+                const el = document.getElementById(`screen-q${i}`);
+                if (el) el.classList.add('hidden');
+            }
+
+            const currentEl = document.getElementById(`screen-q${step}`);
+            if (currentEl) {
+                currentEl.classList.remove('hidden');
+            }
+
+            updateProgress(step);
+        }
+
+        function prevStep(currentStep) {
+            if (currentStep > 1) {
+                showStep(currentStep - 1);
+            }
+        }
+
+        function selectOption(step, value) {
+            answers[`q${step}`] = value;
+
+            if (step === 1 && value === 'nenhuma') {
+                showEarlyExit();
+                return;
+            }
+
+            if (step < totalSteps) {
+                showStep(step + 1);
+            } else {
+                processResult();
+            }
+        }
+
+        function showEarlyExit() {
+            document.getElementById('progress-container').classList.add('hidden');
+            document.getElementById('screen-q1').classList.add('hidden');
+            
+            const resultScreen = document.getElementById('screen-result');
+            resultScreen.classList.remove('hidden');
+
+            const badge = document.getElementById('result-badge');
+            badge.className = "inline-flex items-center space-x-1 px-3 py-1 rounded-full text-xs font-semibold mb-3 bg-neutral-800 text-gray-300 border border-neutral-700";
+            badge.innerHTML = `<i class="fa-solid fa-circle-info"></i> <span>Atendimento Informativo</span>`;
+
+            document.getElementById('result-title').innerText = "Análise Geral no INSS";
+            document.getElementById('result-description').innerHTML = 
+                "O Salário Maternidade é destinado especificamente a mães grávidas, mães com filhos até 5 anos ou casos de adoção/guarda judicial.<br><br>Caso você precise de auxílio com Aposentadoria, BPC/LOAS ou Auxílio-Doença, fale diretamente com o consultor <b>Josivaldo Fonseca</b>.";
+
+            document.getElementById('summary-q1').innerText = "Nenhuma das opções";
+            document.getElementById('summary-q2').innerText = "Não aplicável";
+            document.getElementById('summary-q3').innerText = "Não informado";
+            document.getElementById('summary-q4').innerText = "Não informado";
+
+            setupWhatsappBtn("Olá Josivaldo, gostaria de tirar dúvidas sobre outros benefícios do INSS.");
+        }
+
+        function processResult() {
+            for(let i = 1; i <= 4; i++) {
+                document.getElementById(`screen-q${i}`).classList.add('hidden');
+            }
+            document.getElementById('progress-container').classList.add('hidden');
+
+            const loadingScreen = document.getElementById('screen-loading');
+            loadingScreen.classList.remove('hidden');
+
+            setTimeout(() => {
+                loadingScreen.classList.add('hidden');
+                renderFinalDiagnosis();
+            }, 800);
+        }
+
+        function renderFinalDiagnosis() {
+            const resultScreen = document.getElementById('screen-result');
+            resultScreen.classList.remove('hidden');
+
+            const badge = document.getElementById('result-badge');
+            const title = document.getElementById('result-title');
+            const desc = document.getElementById('result-description');
+
+            const { q1, q2, q3, q4 } = answers;
+
+            const mapQ1 = {
+                'gravida': 'Estou grávida',
+                'mae': 'Filho menor de 5 anos',
+                'adocao': 'Adoção / Guarda judicial',
+                'nenhuma': 'Nenhuma das opções'
+            };
+
+            const mapQ2 = {
+                'gestante_1_5': 'Gestante (1 a 5 meses)',
+                'gestante_6_9': 'Gestante (6 a 9 meses)',
+                'filho_ate_5': 'Filho com até 5 anos',
+                'termo_guarda': 'Aguardando guarda/sentença'
+            };
+
+            const mapQ3 = {
+                'clt': 'CLT / Carteira assinada',
+                'mei': 'MEI (Microempreendedora)',
+                'autonoma': 'Autônoma / Informal',
+                'desempregada': 'Desempregada / Dona de casa',
+                'facultativa': 'Segurada Facultativa'
+            };
+
+            const mapQ4 = {
+                'sim_atualmente': 'Contribui atualmente',
+                'ja_contribuiu': 'Já contribuiu no passado',
+                'nunca': 'Nunca contribuiu'
+            };
+
+            document.getElementById('summary-q1').innerText = mapQ1[q1] || '-';
+            document.getElementById('summary-q2').innerText = mapQ2[q2] || '-';
+            document.getElementById('summary-q3').innerText = mapQ3[q3] || '-';
+            document.getElementById('summary-q4').innerText = mapQ4[q4] || '-';
+
+            let isHigh = (q4 === 'sim_atualmente' || q3 === 'clt' || q3 === 'mei');
+            let isMedium = (q4 === 'ja_contribuiu' || q3 === 'desempregada' || q3 === 'autonoma');
+
+            if (isHigh) {
+                badge.className = "inline-flex items-center space-x-1.5 px-3 py-1 rounded-full text-xs font-semibold mb-3 bg-emerald-500/20 text-emerald-400 border border-emerald-500/30";
+                badge.innerHTML = `<i class="fa-solid fa-circle-check"></i> <span>Alta Probabilidade de Aprovação</span>`;
+
+                title.innerHTML = `Excelente! Você tem grandes chances de receber até <span class="gold-gradient-text">4 Salários Mínimos!</span>`;
+
+                desc.innerHTML = `Identificamos que você se enquadra nos principais critérios do INSS. Como <b>${mapQ3[q3]}</b> e <b>${mapQ4[q4]}</b>, você possui direito garantido ao benefício maternidade.`;
+            } else if (isMedium) {
+                badge.className = "inline-flex items-center space-x-1.5 px-3 py-1 rounded-full text-xs font-semibold mb-3 bg-amber-500/20 text-amber-400 border border-amber-500/30";
+                badge.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> <span>Análise de Período de Graça Necessária</span>`;
+
+                title.innerHTML = `Você ainda pode ter direito ao <span class="gold-gradient-text">Salário Maternidade!</span>`;
+
+                desc.innerHTML = `Mesmo estando desempregada ou sem pagar o INSS hoje, quem já trabalhou no passado pode estar protegida pelo <b>Período de Graça</b> do INSS e receber todo o valor do benefício.`;
+            } else {
+                badge.className = "inline-flex items-center space-x-1.5 px-3 py-1 rounded-full text-xs font-semibold mb-3 bg-blue-500/20 text-blue-400 border border-blue-500/30";
+                badge.innerHTML = `<i class="fa-solid fa-magnifying-glass"></i> <span>Análise Especializada</span>`;
+
+                title.innerHTML = `Consulte sua situação de carência previdenciária`;
+
+                desc.innerHTML = `É necessário analisar o seu histórico do CNIS para verificar se existem contribuições passadas ou formas de regularizar sua situação junto ao INSS.`;
+            }
+
+            const messageText = `Olá Josivaldo! Realizei a simulação no seu site:%0A` +
+                `• *Momento:* ${mapQ1[q1]}%0A` +
+                `• *Fase:* ${mapQ2[q2]}%0A` +
+                `• *Situação:* ${mapQ3[q3]}%0A` +
+                `• *INSS:* ${mapQ4[q4]}%0A%0A` +
+                `Quero atendimento para solicitar o meu Salário Maternidade!`;
+
+            setupWhatsappBtn(messageText);
+        }
+
+        function setupWhatsappBtn(text) {
+            const phone = "558173133856";
+            const btn = document.getElementById('whatsapp-btn');
+            btn.href = `https://wa.me/${phone}?text=${text}`;
+        }
+
+        function restartQuiz() {
+            answers.q1 = null;
+            answers.q2 = null;
+            answers.q3 = null;
+            answers.q4 = null;
+
+            document.getElementById('screen-result').classList.add('hidden');
+            document.getElementById('screen-welcome').classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>
+```
+
+### Highlights of the implementation:
+1. **Photo Header**: The top profile header features your photo, gold border gradient ring, verified check badge, name, and subtitle. Hovering or tapping on the profile image reveals a camera icon that lets you pick/change the photo locally anytime.
+2. **Instagram Web Layout**: Compact design crafted for mobile devices and in-app Instagram webviews, using dark background tones (`#050506` and `#111114`) with metallic gold accents.
+3. **4-Step Interactive Quiz**: Implements all 4 custom questions with responsive choices and a smooth progress bar.
+4. **Calculated Diagnosis**: Evaluates responses for High Probability, Period of Grace analysis, or Specialized Analysis.
+5. **Direct WhatsApp Conversion**: Generates a custom pre-filled message sent straight to `https://wa.me/558173133856` upon clicking the final button.
